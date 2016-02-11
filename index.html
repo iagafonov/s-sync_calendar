@@ -1,0 +1,229 @@
+<!doctype html>
+<html>
+<head>
+    <title>S-Sync Example</title>
+    <style>
+        body {
+            font-family: arial;
+        }
+        .s-hide {
+            display: none;
+        }
+    </style>
+
+    <script src="s-sync.js"></script>
+
+    <style>
+        table {
+            border-right: 2px solid gray;
+            border-spacing: 0;
+            border-collapse: collapse;
+        }
+        .day-header {
+            border: 1px solid gray;
+            white-space: nowrap
+        }
+
+        .day-header:hover {
+            cursor: pointer;
+        }
+
+        .hour-cell:hover {
+            background-color: #559 !important;
+            color: white;
+        }
+
+        .hour-cell {
+            width: 120px;
+            text-align: center;
+            border-left: 1px solid gray;
+            border-bottom: 1px solid #eee;
+            cursor: pointer;
+            height: 30px;
+            padding: 0;
+        }
+
+        .hour-cell > div {
+            height: 100%;
+        }
+
+        .hour-cell .time {
+            padding-top: 10px; /* poor man's vertical centering */
+        }
+
+        .hour-cell .searching {
+            color: blue;
+            font-size: 12px;
+            padding-top: 12px; /* poor man's vertical centering */
+        }
+
+        .hour-cell .good-results {
+            color: #090;
+            background: #efffef;
+        }
+
+        .hour-cell .weak-results {
+            color: orange;
+            background: #ffffef;
+        }
+
+        .hour-cell .bad-results {
+            color: red;
+            background: #ffefef;
+        }
+    </style>
+    <style>
+        .searching {
+            color: blue;
+            font-size: 10px;
+            padding-top: 6px; /* poor man's vertical centering */
+        }
+        .goodresults {
+            color: #090;
+            background: #efffef;
+        }
+
+        .result-label {
+            font-size: 8px;
+        }
+
+        .weakresults {
+            color: orange;
+            background: #ffffef;
+        }
+
+        .badresults {
+            color: red;
+            background: #ffefef;
+        }
+
+        :hover {
+            background-color: #559 !important;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+
+<h1>S-Sync Example</h1>
+<div class="calendar">
+    <button class="btn" s-hide="isLoaded" s-on.click="load()">Load</button>
+    <button class="btn" s-show="isLoaded" s-on.click="searchAll()">Search all month</button>
+    <table s-show="isLoaded">
+        <tr>
+            <th s-for="day:days" class="day-header" s-on.click="dayHeaderClicked(day)" s-text="day"></th>
+        </tr>
+        <tr s-for="hour:hours">
+            <td s-for="day:days" class="hour-cell">
+                <div s-attr.class="getClassList()">
+                    <div s-show="showSpinner()">
+                        ...
+                    </div>
+                    <div s-show="showTime()" s-on.click="cellClicked()" class="time">
+                        <span s-text="hour"></span><span>:00</span>
+                    </div>
+                    <div s-show="showSearchResults()">
+                        <div s-text="options"></div>
+                        <div class="result-label">results</div>
+                    </div>
+                </div>
+            </td>
+        </tr>
+    </table>
+</div>
+<script>
+    var fn = function (exp) {
+        return new Function('a, b', 'return ' + exp);
+    };
+
+    var _ = {
+        range: function (l, r) {
+            var _r = r;
+            r = r == null ? l : r;
+            l = _r == null ? 0 : l;
+            var arr = new Array(r - l);
+            for (var i = l; i < r; i++) arr[i] = i;
+            return arr;
+        }
+    };
+
+    var cells = [];
+
+    var addCell = function (cell) {
+        cells.push(cell);
+    };
+
+    var searchAllCells = function () {
+        for (var i = 0; i < cells.length; i++) {
+            cells[i].cellClicked();
+        }
+    };
+
+    var calendar = new SSync({
+        data: {
+            hours: _.range(24),
+            days: _.range(1, 32).map(fn("'Oct ' + a")),
+            isLoaded: false
+        },
+        methods: {
+            load: function () {
+                this.isLoaded = true;
+            },
+            searchAll: function () {
+                searchAllCells();
+            },
+            dayHeaderClicked: function () {
+                alert('dayHeaderClicked()');
+            }
+        }
+    });
+
+    var cell = {
+        data: {
+            isSearching: false,
+            options: null
+        },
+        methods: {
+            cellClicked: function () {
+                var alreadySearching = this.isSearching;
+                this.options = null;
+                this.isSearching = !alreadySearching;
+                if (!alreadySearching) {
+                    // Simulate an AJAX request:
+                    var self = this;
+                    self.isSearching = true;
+                    setTimeout(function () {
+                        self.isSearching = false;
+                        self.options = Math.floor(Math.random() * 5);
+                    }, Math.floor(Math.random() * 500));
+                }
+            }
+        },
+        showSpinner: function () {
+            return this.isSearching;
+        },
+        hideSpinner: function () {
+            return !this.isSearching;
+        },
+        showTime: function () {
+            return !this.isSearching && this.options === null;
+        },
+        showSearchR: function esults() {
+            return !this.isSearching && this.options !== null;
+        },
+        getClassList: function () {
+            return [
+                ['goodresults', fn('a>3')]
+                        ['weakresults', fn('a>1 && a<3')]
+                        ['badresults', fn('a==0')]
+            ].map(fn('a[1]() ? a[0] : ""')(this.options)).concat([
+                this.isSearching ? 'searching' : ''
+            ]).join(' ');
+        }
+    };
+
+    calendar.compile('body');
+
+</script>
+</body>
+</html>
