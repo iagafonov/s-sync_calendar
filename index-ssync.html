@@ -1,0 +1,49 @@
+<!doctype html>
+<html>
+<head>
+    <title>S-Sync Example</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="s-sync.js"></script>
+</head>
+
+<body>
+
+<h1>S-Sync Example</h1>
+
+<template id="calendar">
+    <div class="calendar">
+        <button class="btn" v-show="!isLoaded" s-on.click="load">Load</button>
+        <button class="btn" s-show="isLoaded" s-on.click="searchAll">Search all month</button>
+        <table s-show="isLoaded">
+            <tr>
+                <th s-for="day:days" class="day-header" s-on.click="dayHeaderClicked" s-text="day"></th>
+            </tr>
+            <tr s-for="hour:hours">
+                <td s-for="day:days" class="hour-cell">
+                    <calendar-cell hour="hour" day="day"></calendar-cell>
+                </td>
+            </tr>
+        </table>
+    </div>
+</template>
+
+<template id="calendar-cell">
+    <div s-attr.class="classList">
+        <div s-show="isSearching">
+            ...
+        </div>
+        <div s-show="showTime" s-on.click="cellClicked" class="time">
+            <span s-text="hour"></span><span>:00</span>
+        </div>
+        <div s-show="showSearchResults">
+            <div s-text="options"></div>
+            <div class="result-label">results</div>
+        </div>
+    </div>
+</template>
+
+<calendar></calendar>
+
+<script src="app.js"></script>
+</body>
+</html>

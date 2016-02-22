@@ -1,47 +1,49 @@
 <!doctype html>
 <html>
 <head>
-    <title>S-Sync Example</title>
+    <title>Vue Example</title>
     <link rel="stylesheet" href="style.css">
-    <script src="s-sync.js"></script>
+    <script src="vue.min.js"></script>
 </head>
-<body>
 
-<h1>S-Sync Example</h1>
-<template id="calendar">
+<script type="text/x-template" id="calendar_">
     <div class="calendar">
-        <button class="btn" s-hide="isLoaded" s-on.click="load">Load</button>
-        <button class="btn" s-show="isLoaded" s-on.click="searchAll">Search all month</button>
-        <table s-show="isLoaded">
+        <button class="btn" v-if="!isLoaded" @click="load">Load</button>
+        <button class="btn" v-if="isLoaded" @click="searchAll">Search all month</button>
+        <table v-if="isLoaded">
             <tr>
-                <th s-for="day:days" class="day-header" s-on.click="dayHeaderClicked" s-text="day"></th>
+                <th v-for="day in days" class="day-header" @click="dayHeaderClicked" v-text="day"></th>
             </tr>
-            <tr s-for="hour:hours">
-                <td s-for="day:days" class="hour-cell">
-                    <calendar-cell hour="hour" day="day"></calendar-cell>
+            <tr v-for="hour in hours">
+                <td v-for="day in days" class="hour-cell">
+                    <calendar-cell :hour="hour" :day="day"></calendar-cell>
                 </td>
             </tr>
         </table>
     </div>
-</template>
+</script>
 
-<template id="calendar-cell">
-    <div s-attr.class="classList">
-        <div s-show="isSearching">
+<script type="text/x-template" id="calendar-cell_">
+    <div :class="classList">
+        <div v-if="isSearching">
             ...
         </div>
-        <div s-show="showTime" s-on.click="cellClicked" class="time">
-            <span s-text="hour"></span><span>:00</span>
+        <div v-if="showTime" @click="cellClicked" class="time">
+            <span v-text="hour"></span><span>:00</span>
         </div>
-        <div s-show="showSearchResults">
-            <div s-text="options"></div>
+        <div v-if="showSearchResults">
+            <div v-text="options"></div>
             <div class="result-label">results</div>
         </div>
     </div>
-</template>
+</script>
+
+<body>
+
+<h1>Vue Example</h1>
 
 <calendar></calendar>
 
-<script src="app.js"></script>
+<script src="app-vue.js"></script>
 </body>
 </html>

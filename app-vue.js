@@ -26,33 +26,18 @@ var searchAllCells = function () {
     }
 };
 
-var Calendar = SSync.component('calendar', {
-    data: {
-        hours: _.range(24),
-        days: _.range(1, 32).map(fn("'Oct ' + a")),
-        isLoaded: false
-    },
-    methods: {
-        load: function () {
-            this.isLoaded = true;
-        },
-        searchAll: function () {
-            searchAllCells();
-        },
-        dayHeaderClicked: function () {
-            alert('dayHeaderClicked()');
+var cell = Vue.extend({
+    template: '#calendar-cell_',
+    data: function () {
+        addCell(this);
+        return {
+            isSearching: false,
+            options: null
         }
-    }
-});
-
-Calendar.component('calendar-cell', {
-    data: {
-        isSearching: false,
-        options: null
     },
     props: {
-        hour: true,
-        day: true
+        hour: Number,
+        day: String
     },
     methods: {
         cellClicked: function () {
@@ -78,17 +63,41 @@ Calendar.component('calendar-cell', {
             return !this.isSearching && this.options !== null;
         },
         classList: function () {
-            return [
-                ['goodresults', fn('a>3')],
-                ['weakresults', fn('a>1 && a<3')],
-                ['badresults', fn('a==0')]
-            ].map(fn('a[1]() ? a[0] : ""')(this.options)).concat([
-                this.isSearching ? 'searching' : ''
-            ]).join(' ');
+            return {
+                'goodresults': this.options > 3,
+                'weakresults': this.options >= 1 && this.options <= 3,
+                'badresults': this.options === 0,
+                'searching': this.isSearching
+            }
         }
     }
 });
 
-var app = new SSync({
-    selector: 'body'
+Vue.component('calendar', {
+    template: '#calendar_',
+    data: function () {
+        return {
+            hours: _.range(24),
+            days: _.range(1, 32).map(fn("'Oct ' + a")),
+            isLoaded: false
+        }
+    },
+    methods: {
+        load: function () {
+            this.isLoaded = true;
+        },
+        searchAll: function () {
+            searchAllCells();
+        },
+        dayHeaderClicked: function () {
+            alert('dayHeaderClicked()');
+        }
+    },
+    components: {
+        'calendar-cell': cell
+    }
+});
+
+var app = new Vue({
+    el: 'body'
 });
